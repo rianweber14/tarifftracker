@@ -1,0 +1,22 @@
+{
+  "name": "aitarifftracker-paywall",
+  "version": "1.0.0",
+  "description": "Stripe paywall implementation for AITariffTracker.com",
+  "main": "index.js",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required for static site'",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "stripe": "^14.8.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "keywords": ["stripe", "paywall", "supabase", "netlify"],
+  "author": "AITariffTracker",
+  "license": "MIT"
+}
+

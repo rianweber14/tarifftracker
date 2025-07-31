@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tariff Data - AITariffTracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .header {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      color: #2563eb;
+      margin-bottom: 0.5rem;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .nav-links a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+    
+    .content-section {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .content-section h2 {
+      color: #1e293b;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .content-section h3 {
+      color: #374151;
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+    }
+    
+    .content-section p {
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    
+    .data-table th,
+    .data-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .data-table th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .data-table tr:hover {
+      background: #f8fafc;
+    }
+    
+    .upgrade-prompt {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 0.5rem;
+      margin: 2rem 0;
+    }
+    
+    .upgrade-prompt h3 {
+      color: white;
+      margin-bottom: 1rem;
+    }
+    
+    .upgrade-prompt p {
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 1.5rem;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    
+    .btn-white {
+      background: white;
+      color: #2563eb;
+    }
+    
+    .btn-white:hover {
+      background: #f1f5f9;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #64748b;
+    }
+    
+    .error-message {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+      border: 1px solid #fecaca;
+    }
+    
+    .tier-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    
+    .tier-free {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    
+    .tier-basic {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .tier-professional {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .tier-enterprise {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .chart-placeholder {
+      width: 100%;
+      height: 300px;
+      background: #f8fafc;
+      border: 2px dashed #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      border-radius: 0.375rem;
+      margin: 1rem 0;
+    }
+    
+    .export-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .export-buttons .btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .api-section {
+      background: #1e293b;
+      color: white;
+      padding: 1.5rem;
+      border-radius: 0.375rem;
+      margin: 1rem 0;
+    }
+    
+    .api-section h4 {
+      color: #f1f5f9;
+      margin-bottom: 0.5rem;
+    }
+    
+    .api-section code {
+      background: #374151;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+    
+    .api-section pre {
+      background: #374151;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      overflow-x: auto;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-links">
+      <a href="/">← Back to Home</a>
+      <a href="/account.html">My Account</a>
+    </div>
+    
+    <div class="header">
+      <h1>AI Tariff Data & Analysis</h1>
+      <p>Comprehensive tariff intelligence for AI-related products and services</p>
+    </div>
+    
+    <div id="loading" class="loading">Loading content...</div>
+    
+    <div id="error-message" class="error-message" style="display: none;"></div>
+    
+    <div id="login-required" class="upgrade-prompt" style="display: none;">
+      <h3>Login Required</h3>
+      <p>Please log in to access tariff data and analysis tools.</p>
+      <a href="/login.html?return=/protected-data" class="btn btn-white">Log In</a>
+      <a href="/signup.html" class="btn btn-white">Sign Up</a>
+    </div>
+    
+    <!-- Free Content (visible to all logged-in users) -->
+    <div id="free-content" class="content-section" style="display: none;">
+      <div class="tier-badge tier-free">Free Access</div>
+      <h2>Current AI Tariff Overview</h2>
+      <p>Basic overview of current AI tariff rates for major trading partners.</p>
+      
+      <h3>Current Tariff Rates</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Country/Region</th>
+            <th>AI Hardware</th>
+            <th>AI Software</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>United States</td>
+            <td>7.5%</td>
+            <td>0%</td>
+            <td>2025-07-25</td>
+          </tr>
+          <tr>
+            <td>China</td>
+            <td>25.0%</td>
+            <td>15.0%</td>
+            <td>2025-07-28</td>
+          </tr>
+          <tr>
+            <td>European Union</td>
+            <td>4.2%</td>
+            <td>0%</td>
+            <td>2025-07-30</td>
+          </tr>
+          <tr>
+            <td>Japan</td>
+            <td>0%</td>
+            <td>0%</td>
+            <td>2025-07-29</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Basic Tier Content -->
+    <div id="basic-content" class="content-section" style="display: none;">
+      <div class="tier-badge tier-basic">Basic Tier</div>
+      <h2>Enhanced Tariff Data</h2>
+      <p>Access to detailed tariff breakdowns and 6 months of historical data.</p>
+      
+      <h3>Detailed Tariff Categories</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Product Category</th>
+            <th>HS Code</th>
+            <th>US Rate</th>
+            <th>China Rate</th>
+            <th>EU Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AI Processors/Chips</td>
+            <td>8542.31</td>
+            <td>7.5%</td>
+            <td>25.0%</td>
+            <td>4.2%</td>
+          </tr>
+          <tr>
+            <td>Machine Learning Hardware</td>
+            <td>8471.50</td>
+            <td>0%</td>
+            <td>15.0%</td>
+            <td>0%</td>
+          </tr>
+          <tr>
+            <td>AI Development Software</td>
+            <td>8523.49</td>
+            <td>0%</td>
+            <td>10.0%</td>
+            <td>0%</td>
+          </tr>
+          <tr>
+            <td>Neural Network Components</td>
+            <td>8542.39</td>
+            <td>5.0%</td>
+            <td>20.0%</td>
+            <td>3.5%</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <h3>6-Month Trend</h3>
+      <div class="chart-placeholder">
+        Historical trend chart (6 months) would be displayed here
+      </div>
+      
+      <div class="export-buttons">
+        <button class="btn btn-primary" onclick="exportData('csv')">Export CSV</button>
+      </div>
+    </div>
+    
+    <!-- Professional Tier Content -->
+    <div id="professional-content" class="content-section" style="display: none;">
+      <div class="tier-badge tier-professional">Professional Tier</div>
+      <h2>Advanced Tariff Analysis</h2>
+      <p>Comprehensive historical analysis with advanced filtering and multiple export options.</p>
+      
+      <h3>3-Year Historical Analysis</h3>
+      <div class="chart-placeholder">
+        Advanced 3-year historical trend analysis would be displayed here
+      </div>
+      
+      <h3>Tariff Impact Analysis</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Trade Route</th>
+            <th>2023 Avg</th>
+            <th>2024 Avg</th>
+            <th>2025 Current</th>
+            <th>Change (%)</th>
+            <th>Impact Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>US → China (AI Hardware)</td>
+            <td>15.0%</td>
+            <td>22.5%</td>
+            <td>25.0%</td>
+            <td>+66.7%</td>
+            <td>High</td>
+          </tr>
+          <tr>
+            <td>China → US (AI Hardware)</td>
+            <td>5.0%</td>
+            <td>7.5%</td>
+            <td>7.5%</td>
+            <td>+50.0%</td>
+            <td>Medium</td>
+          </tr>
+          <tr>
+            <td>EU → US (AI Software)</td>
+            <td>0%</td>
+            <td>0%</td>
+            <td>0%</td>
+            <td>0%</td>
+            <td>Low</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="export-buttons">
+        <button class="btn btn-primary" onclick="exportData('csv')">Export CSV</button>
+        <button class="btn btn-primary" onclick="exportData('excel')">Export Excel</button>
+        <button class="btn btn-primary" onclick="exportData('pdf')">Export PDF</button>
+      </div>
+    </div>
+    
+    <!-- Enterprise Tier Content -->
+    <div id="enterprise-content" class="content-section" style="display: none;">
+      <div class="tier-badge tier-enterprise">Enterprise Tier</div>
+      <h2>API Access & Custom Integration</h2>
+      <p>Full API access for custom integrations and automated data retrieval.</p>
+      
+      <div class="api-section">
+        <h4>API Endpoint</h4>
+        <pre><code>GET https://api.aitarifftracker.com/v1/tariffs
+Authorization: Bearer YOUR_API_KEY</code></pre>
+        
+        <h4>Example Response</h4>
+        <pre><code>{
+  "data": [
+    {
+      "country_from": "US",
+      "country_to": "CN",
+      "product_category": "ai_hardware",
+      "hs_code": "8542.31",
+      "tariff_rate": 25.0,
+      "effective_date": "2025-07-01",
+      "last_updated": "2025-07-30T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "per_page": 100,
+    "total": 1250
+  }
+}</code></pre>
+        
+        <h4>Your API Key</h4>
+        <p>API Key: <code id="api-key">Loading...</code></p>
+        <button class="btn btn-primary" onclick="regenerateApiKey()">Regenerate API Key</button>
+      </div>
+      
+      <h3>Custom Data Feeds</h3>
+      <p>Set up automated data feeds for your systems with real-time updates.</p>
+      <button class="btn btn-primary">Configure Data Feed</button>
+    </div>
+    
+    <!-- Upgrade Prompts -->
+    <div id="basic-upgrade" class="upgrade-prompt" style="display: none;">
+      <h3>Upgrade to Professional</h3>
+      <p>Get access to 3+ years of historical data, advanced analysis tools, and multiple export formats.</p>
+      <a href="/checkout.html?plan=professional" class="btn btn-white">Upgrade to Professional - $49/month</a>
+    </div>
+    
+    <div id="professional-upgrade" class="upgrade-prompt" style="display: none;">
+      <h3>Upgrade to Enterprise</h3>
+      <p>Get full API access, custom integrations, and dedicated support for your organization.</p>
+      <a href="/checkout.html?plan=enterprise" class="btn btn-white">Upgrade to Enterprise - $199/month</a>
+    </div>
+  </div>
+  
+  <script>
+    // Content access verification
+    async function verifyAccess(contentType, resourceId = null) {
+      try {
+        const session = await getSession();
+        
+        if (!session) {
+          return { access: false, plan: 'none' };
+        }
+        
+        const response = await fetch('/.netlify/functions/verify-subscription-access', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            contentType,
+            resourceId
+          })
+        });
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error verifying access:', error);
+        return { access: false, error: 'Verification failed' };
+      }
+    }
+    
+    // Export data function
+    async function exportData(format) {
+      try {
+        const session = await getSession();
+        if (!session) {
+          alert('Please log in to export data');
+          return;
+        }
+        
+        // This would call your export function
+        alert(`Export in ${format.toUpperCase()} format would be triggered here`);
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('Failed to export data. Please try again.');
+      }
+    }
+    
+    // Generate API key function
+    async function regenerateApiKey() {
+      try {
+        const session = await getSession();
+        if (!session) {
+          alert('Please log in to regenerate API key');
+          return;
+        }
+        
+        // This would call your API key generation function
+        const newKey = 'api_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        document.getElementById('api-key').textContent = newKey;
+        alert('Your API key has been regenerated');
+      } catch (error) {
+        console.error('API key generation error:', error);
+        alert('Failed to regenerate API key. Please try again.');
+      }
+    }
+    
+    // Load protected content based on user access
+    async function loadProtectedContent() {
+      try {
+        const user = await getCurrentUser();
+        
+        if (!user) {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('login-required').style.display = 'block';
+          return;
+        }
+        
+        // Verify access to each content tier
+        const freeAccess = await verifyAccess('free');
+        const basicAccess = await verifyAccess('basic');
+        const professionalAccess = await verifyAccess('professional');
+        const enterpriseAccess = await verifyAccess('enterprise');
+        
+        // Show content based on access levels
+        if (freeAccess.access) {
+          document.getElementById('free-content').style.display = 'block';
+        }
+        
+        if (basicAccess.access) {
+          document.getElementById('basic-content').style.display = 'block';
+        }
+        
+        if (professionalAccess.access) {
+          document.getElementById('professional-content').style.display = 'block';
+        }
+        
+        if (enterpriseAccess.access) {
+          document.getElementById('enterprise-content').style.display = 'block';
+          // Load API key for enterprise users
+          document.getElementById('api-key').textContent = 'api_' + Math.random().toString(36).substring(2, 15);
+        }
+        
+        // Show upgrade prompts based on current tier
+        if (basicAccess.access && !professionalAccess.access) {
+          document.getElementById('basic-upgrade').style.display = 'block';
+        }
+        
+        if (professionalAccess.access && !enterpriseAccess.access) {
+          document.getElementById('professional-upgrade').style.display = 'block';
+        }
+        
+        // Hide loading indicator
+        document.getElementById('loading').style.display = 'none';
+      } catch (error) {
+        console.error('Error loading protected content:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error-message').textContent = 'Error loading content. Please try again.';
+        document.getElementById('error-message').style.display = 'block';
+      }
+    }
+    
+    // Load content when page loads
+    document.addEventListener('DOMContentLoaded', loadProtectedContent);
+  </script>
+</body>
+</html>
+

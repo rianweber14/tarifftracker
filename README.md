@@ -1,131 +1,237 @@
-# Tariff Tracker
+# AITariffTracker Stripe Paywall Implementation
 
-A modern, responsive web application for tracking and analyzing tariff data across different countries and industries.
+This is a complete Stripe paywall implementation for your AITariffTracker.com site using Supabase Auth and Netlify Functions. This solution minimizes development time while providing a robust, scalable subscription system.
 
-## Features
-
-- **Dashboard Overview**: Real-time statistics showing total tariffs, countries, industries, and last update
-- **Add New Tariffs**: Easy-to-use form to add tariff entries with country, industry, rate, and effective date
-- **Search & Filter**: Advanced filtering by country, industry, and text search
-- **Edit & Delete**: Full CRUD operations for managing tariff data
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- **Local Storage**: Data persists in browser localStorage
-- **Modern UI**: Clean, professional interface with smooth animations
-
-## Technologies Used
-
-- **HTML5**: Semantic markup structure
-- **CSS3**: Modern styling with Flexbox and Grid layouts
-- **JavaScript (ES6+)**: Vanilla JavaScript with modern features
-- **Font Awesome**: Icons for enhanced UI
-- **Google Fonts**: Inter font family for typography
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
+- Netlify account
+- Stripe account (test mode for development)
+- Supabase account
+- Git repository connected to Netlify
 
-No special requirements! This is a pure HTML/CSS/JavaScript application that runs in any modern web browser.
+### 1. Set Up Supabase
 
-### Installation
+1. **Create a new Supabase project** at [supabase.com](https://supabase.com)
+2. **Run the database setup**:
+   - Go to your Supabase dashboard
+   - Navigate to SQL Editor
+   - Copy and paste the contents of `supabase-setup.sql`
+   - Run the SQL commands
+3. **Get your Supabase credentials**:
+   - Project URL: `https://your-project.supabase.co`
+   - Anon/Public Key: Found in Settings > API
+   - Service Role Key: Found in Settings > API (keep this secret!)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/rianweber14/tarifftracker.git
-   cd tarifftracker
+### 2. Set Up Stripe
+
+1. **Create Stripe products and prices**:
+   - Go to your Stripe Dashboard > Products
+   - Create three products with the following pricing:
+
+   **Basic Plan:**
+   - Monthly: $19/month (recurring)
+   - Annual: $190/year (recurring)
+
+   **Professional Plan:**
+   - Monthly: $49/month (recurring)
+   - Annual: $490/year (recurring)
+
+   **Enterprise Plan:**
+   - Monthly: $199/month (recurring)
+   - Annual: $1,990/year (recurring)
+
+2. **Copy the Price IDs** from each product (you'll need these for the checkout page)
+
+3. **Set up webhook endpoint**:
+   - Go to Developers > Webhooks
+   - Add endpoint: `https://your-site.netlify.app/.netlify/functions/stripe-webhook`
+   - Select events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`
+   - Copy the webhook signing secret
+
+### 3. Configure Your Code
+
+1. **Update `auth.js`**:
+   ```javascript
+   const SUPABASE_URL = 'https://your-project.supabase.co';
+   const SUPABASE_ANON_KEY = 'your-anon-key-here';
    ```
 
-2. Open `index.html` in your web browser
+2. **Update `checkout.html`**:
+   ```javascript
+   const stripe = Stripe('pk_test_your-stripe-publishable-key');
+   
+   // Update the plans object with your actual Stripe Price IDs
+   const plans = {
+     basic: {
+       monthly: { priceId: 'price_your_basic_monthly_id', amount: 19 },
+       annual: { priceId: 'price_your_basic_annual_id', amount: 190 }
+     },
+     // ... update other plans
+   };
+   ```
 
-That's it! The application will load with sample data and be ready to use.
+### 4. Deploy to Netlify
 
-## Usage
+1. **Set environment variables** in Netlify (Site Settings > Environment Variables):
+   ```
+   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+   STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_SERVICE_KEY=your_supabase_service_key
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   URL=https://your-site.netlify.app
+   ```
 
-### Adding Tariffs
+2. **Deploy your site**:
+   - Connect your Git repository to Netlify
+   - Deploy the site
+   - Verify all functions are working
 
-1. Fill out the "Add New Tariff" form on the left side
-2. Select a country from the dropdown
-3. Choose an industry category
-4. Enter the tariff rate (0-100%)
-5. Set the effective date
-6. Add an optional description
-7. Click "Add Tariff"
+### 5. Test Your Implementation
 
-### Managing Tariffs
+1. **Test user registration**: Create a test account
+2. **Test subscription flow**: Subscribe using Stripe test card `4242 4242 4242 4242`
+3. **Test content access**: Verify tier-based content protection
+4. **Test subscription management**: Use the customer portal
 
-- **Search**: Use the search box to find specific tariffs
-- **Filter**: Use the country and industry dropdowns to filter results
-- **Edit**: Click the edit button (pencil icon) to modify a tariff
-- **Delete**: Click the delete button (trash icon) to remove a tariff
+## 📁 File Structure
 
-### Dashboard
+```
+paywall-implementation/
+├── index.html              # Main landing page
+├── login.html              # User login page
+├── signup.html             # User registration page
+├── checkout.html           # Subscription checkout page
+├── account.html            # Account management page
+├── protected-data.html     # Tier-based protected content
+├── success.html            # Payment success page
+├── auth.js                 # Authentication helper functions
+├── package.json            # Dependencies
+├── netlify.toml           # Netlify configuration
+├── supabase-setup.sql     # Database schema
+├── netlify/functions/
+│   ├── create-checkout-session.js    # Stripe checkout
+│   ├── stripe-webhook.js             # Webhook handler
+│   ├── check-subscription.js         # Subscription verification
+│   ├── create-portal-session.js      # Customer portal
+│   └── verify-subscription-access.js # Content access control
+└── README.md              # This file
+```
 
-The dashboard shows:
-- Total number of tariffs tracked
-- Number of countries with tariffs
-- Number of industries affected
-- Last update timestamp
+## 💰 Subscription Tiers
 
-## Data Structure
+### Basic Tier - $19/month or $190/year
+- Current AI tariff rates
+- 6 months historical data
+- Basic visualizations
+- CSV exports
+- Weekly email updates
 
-Each tariff entry contains:
-- **ID**: Unique identifier
-- **Country**: Country code (US, CN, EU, etc.)
-- **Industry**: Industry category (steel, automotive, electronics, etc.)
-- **Tariff Rate**: Percentage rate (0-100%)
-- **Effective Date**: When the tariff takes effect
-- **Description**: Optional notes about the tariff
-- **Created At**: Timestamp when entry was added
-- **Updated At**: Timestamp when entry was last modified
+### Professional Tier - $49/month or $490/year
+- All Basic features
+- 3+ years historical data
+- Advanced filtering tools
+- Multiple export formats
+- Daily alerts
+- Priority support
 
-## Browser Compatibility
+### Enterprise Tier - $199/month or $1,990/year
+- All Professional features
+- Complete historical database
+- API access
+- Custom integrations
+- Quarterly strategy sessions
+- Dedicated support
 
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+## 🔧 Customization
 
-## Local Storage
+### Adding New Content Tiers
+1. Update the `verify-subscription-access.js` function
+2. Add new content sections to `protected-data.html`
+3. Update the access verification logic
 
-The application uses browser localStorage to persist data. This means:
-- Data is saved locally in your browser
-- Data persists between browser sessions
-- No server or database required
-- Data is private to your browser
+### Modifying Pricing
+1. Update Stripe products and prices
+2. Update the `plans` object in `checkout.html`
+3. Update the pricing display on your pages
 
-## Sample Data
+### Adding Features
+- Email notifications: Use Supabase Edge Functions
+- Analytics: Add tracking to your functions
+- Admin dashboard: Create admin-only pages
 
-The application comes with sample tariff data to demonstrate functionality:
-- US Steel tariffs (25%)
-- China Electronics tariffs (15%)
-- EU Automotive tariffs (10%)
-- Canada Agriculture tariffs (5%)
-- Mexico Textiles tariffs (8%)
+## 🛠️ Troubleshooting
 
-## Contributing
+### Common Issues
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+**Subscription not created after payment:**
+- Check webhook endpoint is correct
+- Verify webhook secret in environment variables
+- Check Netlify function logs
 
-## License
+**Content protection not working:**
+- Verify Supabase RLS policies are enabled
+- Check user authentication status
+- Verify subscription data in database
 
-This project is open source and available under the [MIT License](LICENSE).
+**Stripe checkout not working:**
+- Verify Stripe publishable key is correct
+- Check Price IDs match your Stripe products
+- Ensure test mode is enabled for testing
 
-## Future Enhancements
+### Debugging
 
-- Export data to CSV/Excel
-- Import data from external sources
-- Advanced analytics and charts
-- Multi-user support with backend
-- Real-time tariff updates from APIs
-- Mobile app version
+1. **Check Netlify function logs**: Netlify Dashboard > Functions > View logs
+2. **Check Supabase logs**: Supabase Dashboard > Logs
+3. **Check Stripe webhook logs**: Stripe Dashboard > Webhooks > View logs
+4. **Browser console**: Check for JavaScript errors
 
-## Support
+## 🚀 Going Live
 
-If you have any questions or issues, please open an issue on the GitHub repository.
+### Production Checklist
 
----
+1. **Switch to Stripe live mode**:
+   - Update environment variables with live keys
+   - Update webhook endpoint to production URL
+   - Test with real payment methods
 
-Built with ❤️ for efficient tariff tracking and analysis. 
+2. **Update Supabase settings**:
+   - Configure email templates
+   - Set up proper authentication policies
+   - Enable email confirmations if desired
+
+3. **Performance optimization**:
+   - Enable Netlify caching
+   - Optimize images and assets
+   - Monitor function performance
+
+4. **Security**:
+   - Review RLS policies
+   - Audit environment variables
+   - Set up monitoring and alerts
+
+## 📞 Support
+
+For issues with this implementation:
+1. Check the troubleshooting section above
+2. Review Netlify function logs
+3. Check Stripe webhook delivery logs
+4. Verify Supabase database state
+
+## 🔄 Updates and Maintenance
+
+### Regular Tasks
+- Monitor subscription metrics in Stripe
+- Review failed payments and retry logic
+- Update content and pricing as needed
+- Monitor function performance and costs
+
+### Scaling Considerations
+- Consider Netlify Pro for higher function limits
+- Implement caching for frequently accessed data
+- Add monitoring and alerting for critical functions
+
+This implementation provides a solid foundation for your subscription business while minimizing development complexity and maintenance overhead.
+
