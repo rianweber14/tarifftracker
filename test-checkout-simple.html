@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Checkout - AITariffTracker</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .test-btn {
+      background: #2563eb;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 16px;
+    }
+    .test-btn:hover {
+      background: #1d4ed8;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Checkout (Simplified)</h1>
+  <p>This is a simplified test to isolate the Stripe checkout issue.</p>
+  
+  <button class="test-btn" onclick="testCheckout('price_1RreYx09bfPDgdM1fkmu7vNX')">
+    Test Basic Monthly ($19)
+  </button>
+  
+  <div id="error" class="error" style="display: none;"></div>
+
+  <script>
+    // You need to replace this with your actual Stripe publishable key
+    const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY_HERE');
+    
+    async function testCheckout(priceId) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.style.display = 'none';
+      
+      try {
+        // Call simplified function
+        const response = await fetch('/.netlify/functions/create-checkout-session-simple', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            priceId: priceId
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create checkout session');
+        }
+        
+        const { sessionId } = await response.json();
+        
+        // Redirect to Stripe Checkout
+        const { error } = await stripe.redirectToCheckout({
+          sessionId: sessionId
+        });
+        
+        if (error) {
+          throw error;
+        }
+      } catch (error) {
+        console.error('Checkout error:', error);
+        errorDiv.textContent = error.message || 'An error occurred during checkout';
+        errorDiv.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
+
