@@ -404,14 +404,15 @@
         const billing = isAnnual ? 'annual' : 'monthly';
         const priceId = planConfig[billing].priceId;
         
-        // Create checkout session
-        const response = await fetch('/.netlify/functions/create-checkout-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`
-          },
-      body: JSON.stringify({
+           // Create checkout session
+    const response = await fetch("/.netlify/functions/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
+      },
+  body: JSON.stringify({
+
   priceId: selectedPriceId,
   plan: selectedPlan,
 }),
