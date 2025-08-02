@@ -77,8 +77,8 @@ exports.handler = async (event) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.URL}/checkout.html`,
+      success_url: `https://aitarifftracker.com/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://aitarifftracker.com/checkout.html`,
       metadata: {
         user_id: user.id,
         plan: plan
