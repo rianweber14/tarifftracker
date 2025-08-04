@@ -245,6 +245,256 @@
       border-radius: 1px;
     }
     
+    /* Dropdown Navigation */
+    .dropdown-toggle {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .dropdown-toggle i {
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+    
+    .dropdown-toggle:hover i {
+      transform: rotate(180deg);
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
+      min-width: 200px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.2s;
+      z-index: 1000;
+      margin-top: 0.5rem;
+    }
+    
+    .dropdown-toggle:hover + .dropdown-menu,
+    .dropdown-menu:hover {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .dropdown-item {
+      display: block;
+      padding: 0.75rem 1rem;
+      color: #64748b;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+    
+    .dropdown-item:hover {
+      background: #f8fafc;
+      color: #3b82f6;
+      padding-left: 1.25rem;
+    }
+    
+    /* Mobile Navigation */
+    .mobile-menu-toggle {
+      display: none;
+      flex-direction: column;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      gap: 0.25rem;
+    }
+    
+    .hamburger-line {
+      width: 24px;
+      height: 2px;
+      background: #64748b;
+      transition: all 0.3s;
+      border-radius: 1px;
+    }
+    
+    .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
+      transform: rotate(45deg) translate(6px, 6px);
+    }
+    
+    .mobile-menu-toggle.active .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .mobile-menu-toggle.active .hamburger-line:nth-child(3) {
+      transform: rotate(-45deg) translate(6px, -6px);
+    }
+    
+    .mobile-nav-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+    
+    .mobile-nav-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .mobile-nav-content {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 320px;
+      height: 100%;
+      background: white;
+      transform: translateX(100%);
+      transition: transform 0.3s;
+      overflow-y: auto;
+    }
+    
+    .mobile-nav-overlay.active .mobile-nav-content {
+      transform: translateX(0);
+    }
+    
+    .mobile-nav-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .mobile-nav-close {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: #64748b;
+      cursor: pointer;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    
+    .mobile-nav {
+      padding: 1.5rem;
+    }
+    
+    .mobile-nav-link {
+      display: block;
+      padding: 1rem 0;
+      color: #1e293b;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.1rem;
+      border-bottom: 1px solid #f1f5f9;
+      transition: color 0.2s;
+    }
+    
+    .mobile-nav-link:hover {
+      color: #3b82f6;
+    }
+    
+    .mobile-nav-section {
+      margin: 1.5rem 0;
+    }
+    
+    .mobile-nav-section-title {
+      display: block;
+      font-weight: 600;
+      color: #64748b;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    
+    .mobile-nav-sub {
+      padding-left: 1rem;
+      font-size: 1rem;
+      color: #64748b;
+    }
+    
+    .mobile-nav-auth {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    .mobile-nav-auth-link {
+      color: #3b82f6;
+      border-bottom: none;
+    }
+    
+    .mobile-nav-cta {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 1rem;
+      border-bottom: none;
+    }
+    
+    .mobile-nav-cta:hover {
+      color: white;
+    }
+    
+    /* Breadcrumb Navigation */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+    
+    .breadcrumb a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+    
+    .breadcrumb-separator {
+      color: #cbd5e1;
+    }
+    
+    /* Skip to content for accessibility */
+    .skip-to-content {
+      position: absolute;
+      top: -40px;
+      left: 6px;
+      background: #3b82f6;
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      border-radius: 4px;
+      z-index: 10000;
+      transition: top 0.2s;
+    }
+    
+    .skip-to-content:focus {
+      top: 6px;
+    }
+    
     .auth-buttons {
       display: flex;
       gap: 0.75rem;
@@ -887,6 +1137,14 @@
     }
     
     @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        display: flex;
+      }
+      
+      nav {
+        display: none;
+      }
+      
       .hero-container {
         grid-template-columns: 1fr;
         gap: 2rem;
@@ -954,6 +1212,9 @@
   </style>
 </head>
 <body>
+  <!-- Skip to content for accessibility -->
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+  
   <!-- Live Tariff Updates Ticker -->
   <div class="live-ticker">
     <div class="ticker-content">
@@ -1012,10 +1273,59 @@
         </div>
         
         <nav>
-          <a href="/">Features</a>
-          <a href="/checkout.html">Pricing</a>
-          <a href="/about.html">About</a>
+          <a href="#features" class="nav-link">Features</a>
+          <a href="/checkout.html" class="nav-link">Pricing</a>
+          <a href="/protected-data" class="nav-link">Live Data</a>
+          <a href="#" class="nav-link dropdown-toggle" data-dropdown="resources">
+            Resources <i class="fas fa-chevron-down"></i>
+          </a>
+          <div class="dropdown-menu" id="resources">
+            <a href="/about.html" class="dropdown-item">About</a>
+            <a href="/api-docs.html" class="dropdown-item">API Documentation</a>
+            <a href="/help.html" class="dropdown-item">Help Center</a>
+          </div>
         </nav>
+        
+        <!-- Mobile menu toggle -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        
+        <!-- Mobile navigation overlay -->
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+          <div class="mobile-nav-content">
+            <div class="mobile-nav-header">
+              <div class="logo">
+                <div class="logo-icon">
+                  <div class="logo-world"></div>
+                  <div class="logo-arrow"></div>
+                </div>
+                <h1>AI Tariff Tracker</h1>
+              </div>
+              <button class="mobile-nav-close" id="mobile-nav-close">×</button>
+            </div>
+            <nav class="mobile-nav">
+              <a href="#features" class="mobile-nav-link">Features</a>
+              <a href="/checkout.html" class="mobile-nav-link">Pricing</a>
+              <a href="/protected-data" class="mobile-nav-link">Live Data</a>
+              <div class="mobile-nav-section">
+                <span class="mobile-nav-section-title">Resources</span>
+                <a href="/about.html" class="mobile-nav-link mobile-nav-sub">About</a>
+                <a href="/api-docs.html" class="mobile-nav-link mobile-nav-sub">API Documentation</a>
+                <a href="/help.html" class="mobile-nav-link mobile-nav-sub">Help Center</a>
+              </div>
+              <div class="mobile-nav-auth logged-out-only">
+                <a href="/login.html" class="mobile-nav-link mobile-nav-auth-link">Log In</a>
+                <a href="/signup.html" class="mobile-nav-link mobile-nav-cta">Start Free Trial</a>
+              </div>
+              <div class="mobile-nav-auth logged-in-only" style="display: none;">
+                <a href="/account.html" class="mobile-nav-link mobile-nav-cta">My Account</a>
+              </div>
+            </nav>
+          </div>
+        </div>
         
         <div class="auth-buttons">
           <div class="logged-out-only">
@@ -1183,6 +1493,7 @@
     </section>
     
     <section class="features">
+      <a id="features"></a>
       <div class="container">
         <h2 class="section-title">Why Second-by-Second Updates Matter</h2>
         <p class="section-subtitle">In global trade, timing is everything. Don't let outdated data cost you millions.</p>
@@ -1280,6 +1591,8 @@
     </section>
   </main>
   
+  <main id="main-content">
+  
   <footer>
     <div class="container">
       <p>&copy; 2025 AI Tariff Tracker. Real-time global tariff intelligence.</p>
@@ -1294,6 +1607,54 @@
       }
       window.location.href = '/signup.html';
     }
+    
+    // Mobile navigation functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+      const mobileNavClose = document.getElementById('mobile-nav-close');
+      
+      function openMobileNav() {
+        mobileNavOverlay.classList.add('active');
+        mobileMenuToggle.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      function closeMobileNav() {
+        mobileNavOverlay.classList.remove('active');
+        mobileMenuToggle.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      
+      mobileMenuToggle.addEventListener('click', openMobileNav);
+      mobileNavClose.addEventListener('click', closeMobileNav);
+      
+      // Close on overlay click
+      mobileNavOverlay.addEventListener('click', function(e) {
+        if (e.target === mobileNavOverlay) {
+          closeMobileNav();
+        }
+      });
+      
+      // Close on mobile nav link click
+      document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', closeMobileNav);
+      });
+      
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    });
   </script>
 </body>
 </html>
