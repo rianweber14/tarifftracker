@@ -283,7 +283,7 @@
   
   <script>
     // Replace with your actual Stripe publishable key
-    const stripe = Stripe('pk_test_51RiKRf09bfPDgdM1WrdZ3eWYJXiMYcKOejUfRfu7yKK3ZqMDNerY1TuoTS15eWNJRDcmsom2zHp6hc93vAUL6Hvl00nioD0lLk');
+    const stripe = Stripe('pk_live_51RiKRf09bfPDgdM1irGneQ9pHAVyfAxOe4uL4K9qDg36MkeAc6dTx1cPLn4k5iIVnw3clH5t9k9EzTnXqPcJxxWG00FNnZ6LO2');
     
     let selectedPlan = null;
     let isAnnual = false;
@@ -291,16 +291,16 @@
     // Plan configurations
     const plans = {
       basic: {
-        monthly: { priceId: 'price_1RreYx09bfPDgdM1fkmu7vNX', amount: 19 },
-        annual: { priceId: 'price_1RreZg09bfPDgdM1fPcpB0ql', amount: 190 }
+        monthly: { priceId: 'price_1Rqe5X09bfPDgdM1XZgtLvkW', amount: 9 },
+        annual: { priceId: 'price_1Rqe5X09bfPDgdM1uJ48tUjh', amount: 99 }
       },
       professional: {
-        monthly: { priceId: 'price_1Rreat09bfPDgdM19vsLyfbi', amount: 49 },
-        annual: { priceId: 'price_1Rreat09bfPDgdM1OgXg5Ad1', amount: 490 }
+        monthly: { priceId: 'price_1Rqe7909bfPDgdM1e2GBJItx', amount: 49 },
+        annual: { priceId: 'price_1Rqe8M09bfPDgdM1YgoNZGIg', amount: 490 }
       },
       enterprise: {
-        monthly: { priceId: 'price_1Rreb809bfPDgdM1nZz5qctw', amount: 199 },
-        annual: { priceId: 'price_1RrebW09bfPDgdM1nMBQz81a', amount: 1990 }
+        monthly: { priceId: 'price_1Rqe9G09bfPDgdM13vlAZu5z', amount: 199 },
+        annual: { priceId: 'price_1RqeAQ09bfPDgdM1c2FOMaqR', amount: 1990 }
       }
     };
     
