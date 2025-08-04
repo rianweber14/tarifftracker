@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tariff Tracker - Real-Time Global Tariff Intelligence</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #ffffff;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Live Tariff Updates Ticker */
+    .live-ticker {
+      background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 10px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 500;
+      position: relative;
+    }
+
+    .ticker-content {
+      display: inline-block;
+      animation: scroll 45s linear infinite;
+    }
+
+    .ticker-item {
+      display: inline-block;
+      margin-right: 50px;
+      padding: 6px 16px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .ticker-country {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
+    .ticker-change {
+      margin-left: 8px;
+      font-weight: 600;
+    }
+
+    .ticker-change.positive {
+      color: #34d399;
+    }
+
+    .ticker-change.negative {
+      color: #fbbf24;
+    }
+
+    .ticker-category {
+      opacity: 0.9;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    header {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Custom Logo Recreation */
+    .logo-icon {
+      width: 45px;
+      height: 45px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-world {
+      width: 45px;
+      height: 45px;
+      background: #1d4ed8;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+    }
+
+    /* North America shape */
+    .logo-world::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 16px;
+      background: white;
+      top: 8px;
+      left: 8px;
+      clip-path: polygon(
+        20% 0%, 
+        60% 0%, 
+        80% 15%, 
+        100% 25%, 
+        95% 45%, 
+        85% 60%, 
+        70% 75%, 
+        50% 85%, 
+        30% 90%, 
+        15% 85%, 
+        5% 70%, 
+        0% 50%, 
+        5% 30%, 
+        15% 15%
+      );
+    }
+
+    /* South America shape */
+    .logo-world::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 12px;
+      background: white;
+      top: 20px;
+      left: 16px;
+      clip-path: polygon(
+        30% 0%, 
+        70% 5%, 
+        80% 20%, 
+        85% 40%, 
+        75% 60%, 
+        60% 80%, 
+        40% 90%, 
+        25% 85%, 
+        15% 70%, 
+        20% 50%, 
+        25% 30%, 
+        30% 15%
+      );
+    }
+
+    /* Flowing arrow around the globe */
+    .logo-arrow {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border: 3px solid #1d4ed8;
+      border-radius: 50%;
+      border-top-color: transparent;
+      border-left-color: transparent;
+      animation: rotate-arrow 3s linear infinite;
+      top: -2.5px;
+      left: -2.5px;
+    }
+
+    .logo-arrow::before {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 8px solid #1d4ed8;
+      top: -4px;
+      right: -3px;
+      transform: rotate(45deg);
+    }
+
+    @keyframes rotate-arrow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .logo h1 {
+      color: #1e293b;
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    nav {
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #64748b;
+      font-weight: 500;
+      transition: color 0.2s;
+      position: relative;
+    }
+    
+    nav a:hover {
+      color: #3b82f6;
+    }
+
+    nav a:hover::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #3b82f6;
+      border-radius: 1px;
+    }
+    
+    .auth-buttons {
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: #3b82f6;
+      border: 1.5px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #f8fafc;
+      border-color: #3b82f6;
+    }
+    
+    /* Split Hero Section */
+    .hero {
+      padding: 0;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-content {
+      padding: 2rem 0;
+    }
+    
+    .hero h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 800;
+      color: #1e293b;
+      line-height: 1.1;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h1 .emphasis {
+      color: #ef4444;
+      font-weight: 900;
+    }
+    
+    .hero .subtitle {
+      font-size: 1.4rem;
+      margin-bottom: 2rem;
+      color: #64748b;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    .hero .subtitle .highlight {
+      color: #3b82f6;
+      font-weight: 700;
+    }
+
+    .unique-value {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .unique-value::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #f59e0b, #d97706, #f59e0b);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .unique-value h3 {
+      color: #92400e;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .unique-value p {
+      color: #92400e;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .cta-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .cta-primary:hover::before {
+      left: 100%;
+    }
+
+    .cta-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+    }
+
+    .cta-secondary {
+      background: transparent;
+      color: #3b82f6;
+      padding: 1rem 2rem;
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .cta-secondary:hover {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Hero Map */
+    .hero-map {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-map::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #10b981, #3b82f6, #ef4444);
+    }
+
+    .map-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .map-header h3 {
+      color: #1e293b;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .map-header p {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .live-indicator-large {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #10b981;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .live-dot-large {
+      width: 10px;
+      height: 10px;
+      background: white;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
+    .map-placeholder {
+      width: 100%;
+      height: 350px;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      border: 2px dashed #cbd5e1;
+    }
+
+    .map-dots {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-dot {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      animation: pulse-map 3s infinite;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .map-dot::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      top: 4px;
+      left: 4px;
+    }
+
+    .map-dot.green { background: #10b981; top: 25%; left: 15%; animation-delay: 0s; }
+    .map-dot.yellow { background: #f59e0b; top: 20%; left: 50%; animation-delay: 0.5s; }
+    .map-dot.orange { background: #f97316; top: 45%; left: 30%; animation-delay: 1s; }
+    .map-dot.red { background: #ef4444; top: 55%; right: 20%; animation-delay: 1.5s; }
+    .map-dot.blue { background: #3b82f6; top: 35%; right: 35%; animation-delay: 2s; }
+
+    @keyframes pulse-map {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    .tariff-legend {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Stats Section */
+    .stats-section {
+      background: white;
+      padding: 3rem 0;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #3b82f6;
+      display: block;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Live Updates Feed */
+    .live-updates {
+      background: #f8fafc;
+      padding: 4rem 0;
+    }
+
+    .updates-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .updates-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+
+    .update-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+      border: 1px solid #e2e8f0;
+    }
+
+    .update-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .update-info h4 {
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.25rem;
+      font-size: 1.1rem;
+    }
+
+    .update-meta {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .update-change {
+      font-size: 1.5rem;
+      font-weight: 800;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .update-change.positive {
+      color: #10b981;
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 1px solid #bbf7d0;
+    }
+
+    .update-change.negative {
+      color: #ef4444;
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      border: 1px solid #fecaca;
+    }
+
+    /* Features Section */
+    .features {
+      padding: 5rem 0;
+      background: white;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2.5rem;
+      margin-top: 3rem;
+    }
+    
+    .feature-card {
+      background: #f8fafc;
+      padding: 2.5rem;
+      border-radius: 16px;
+      transition: all 0.3s;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      background: white;
+    }
+
+    .feature-icon {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 28px;
+      border: 2px solid #bfdbfe;
+    }
+    
+    .feature-card h3 {
+      color: #1e293b;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    
+    .feature-card p {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .feature-highlight {
+      color: #10b981;
+      font-weight: 700;
+      font-size: 0.9rem;
+      background: #f0fdf4;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      display: inline-block;
+    }
+    
+    .pricing {
+      background: #f8fafc;
+      padding: 5rem 0;
+    }
+    
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    
+    .pricing-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-4px);
+      border-color: #3b82f6;
+      box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+    }
+    
+    .pricing-card.featured {
+      border-color: #3b82f6;
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .pricing-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #1e293b;
+      font-weight: 700;
+    }
+    
+    .pricing-card .price {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #3b82f6;
+      margin-bottom: 1rem;
+    }
+    
+    .pricing-card .price span {
+      font-size: 1rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    
+    .pricing-card ul {
+      list-style: none;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+    
+    .pricing-card li {
+      padding: 0.75rem 0;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+    }
+    
+    .pricing-card li:before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      margin-right: 0.75rem;
+      font-size: 1.2rem;
+    }
+    
+    footer {
+      background: #1e293b;
+      color: white;
+      text-align: center;
+      padding: 3rem 0;
+    }
+    
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #1e293b;
+      font-weight: 800;
+    }
+    
+    .section-subtitle {
+      text-align: center;
+      font-size: 1.25rem;
+      color: #64748b;
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .upgrade-notice {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      color: #92400e;
+      font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+      .hero-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+      }
+
+      .hero-map {
+        order: -1;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      nav {
+        order: -1;
+        gap: 1rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .update-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .map-placeholder {
+        height: 250px;
+      }
+
+      .logo-icon {
+        width: 35px;
+        height: 35px;
+      }
+
+      .logo-world {
+        width: 35px;
+        height: 35px;
+      }
+
+      .logo-arrow {
+        width: 40px;
+        height: 40px;
+        top: -2.5px;
+        left: -2.5px;
+      }
+
+      .logo h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Live Tariff Updates Ticker -->
+  <div class="live-ticker">
+    <div class="ticker-content">
+      <span class="ticker-item">
+        <span class="ticker-country">China</span>
+        <span class="ticker-change positive">+0.7%</span>
+        <span class="ticker-category">Electronics</span>
+      </span>
+      <span class="ticker-item">
+        <span class="ticker-country">Germany</span>
+        <span class="ticker-change negative">-0.3%</span>
+        <span class="ticker-category">Automotive</span>
+      </span>
+      <span class="ticker-item">
+        <span class="ticker-country">Mexico</span>
+        <span class="ticker-change positive">+0.9%</span>
+        <span class="ticker-category">Textiles</span>
+      </span>
+      <span class="ticker-item">
+        <span class="ticker-country">Japan</span>
+        <span class="ticker-change positive">+0.1%</span>
+        <span class="ticker-category">Industrial</span>
+      </span>
+      <span class="ticker-item">
+        <span class="ticker-country">S.Korea</span>
+        <span class="ticker-change positive">+1.3%</span>
+        <span class="ticker-category">Automotive</span>
+      </span>
+      <span class="ticker-item">
+        <span class="ticker-country">India</span>
+        <span class="ticker-change positive">+0.5%</span>
+        <span class="ticker-category">Industrial</span>
+      </span>
+      <span class="ticker-item">
+        <span class="ticker-country">UK</span>
+        <span class="ticker-change negative">-0.2%</span>
+        <span class="ticker-category">Agriculture</span>
+      </span>
+      <span class="ticker-item">
+        <span class="ticker-country">Brazil</span>
+        <span class="ticker-change positive">+0.8%</span>
+        <span class="ticker-category">Manufacturing</span>
+      </span>
+    </div>
+  </div>
+
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">
+            <div class="logo-world"></div>
+            <div class="logo-arrow"></div>
+          </div>
+          <h1>AI Tariff Tracker</h1>
+        </div>
+        
+        <nav>
+          <a href="/">Features</a>
+          <a href="/checkout.html">Pricing</a>
+          <a href="/about.html">About</a>
+        </nav>
+        
+        <div class="auth-buttons">
+          <div class="logged-out-only">
+            <a href="/login.html" class="btn btn-secondary">Log In</a>
+            <a href="/signup.html" class="btn btn-primary">Start Free Trial</a>
+          </div>
+          
+          <div class="logged-in-only" style="display: none;">
+            <a href="/account.html" class="btn btn-primary">My Account</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <main>
+    <!-- Split Hero Section -->
+    <section class="hero">
+      <div class="hero-container">
+        <div class="hero-content">
+          <h1>The <span class="highlight">Only</span> Platform That Updates Tariffs <span class="emphasis">By The Second</span></h1>
+          <p class="subtitle">While others update daily or weekly, we deliver <span class="highlight">real-time tariff intelligence</span> that gives you the competitive edge in global trade decisions.</p>
+          
+          <div class="unique-value">
+            <h3>🚀 World's Fastest Tariff Updates</h3>
+            <p>Every second counts in trade. Get instant notifications the moment tariff rates change anywhere in the world.</p>
+          </div>
+
+          <div class="cta-buttons">
+            <a href="/signup.html" class="cta-primary">Start Free Trial</a>
+            <a href="/protected-data" class="cta-secondary">See Live Data</a>
+          </div>
+        </div>
+
+        <div class="hero-map">
+          <div class="map-header">
+            <div class="live-indicator-large">
+              <div class="live-dot-large"></div>
+              <span>LIVE UPDATES</span>
+            </div>
+            <h3>Global Tariff Intelligence Map</h3>
+            <p>Watch tariff changes happen in real-time across the globe</p>
+          </div>
+          
+          <div class="map-placeholder">
+            <div class="map-dots">
+              <div class="map-dot green"></div>
+              <div class="map-dot yellow"></div>
+              <div class="map-dot orange"></div>
+              <div class="map-dot red"></div>
+              <div class="map-dot blue"></div>
+            </div>
+            Interactive World Map
+          </div>
+          
+          <div class="tariff-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #10b981;"></div>
+              <span>0-2%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #f59e0b;"></div>
+              <span>2-5%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #f97316;"></div>
+              <span>5-10%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #ef4444;"></div>
+              <span>10-15%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #dc2626;"></div>
+              <span>15%+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-number">195</span>
+            <div class="stat-label">Countries Tracked</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">1sec</span>
+            <div class="stat-label">Update Frequency</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">50K+</span>
+            <div class="stat-label">Daily Updates</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">99.9%</span>
+            <div class="stat-label">Uptime</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Updates Feed -->
+    <section class="live-updates">
+      <div class="container">
+        <div class="updates-container">
+          <div class="updates-header">
+            <h2 class="section-title" style="text-align: left; margin-bottom: 0;">Live Tariff Updates</h2>
+            <div class="live-indicator">
+              <div class="live-dot"></div>
+              <span>UPDATING NOW</span>
+            </div>
+          </div>
+          <p class="section-subtitle" style="text-align: left; margin-top: 0;">Real-time tariff changes updated every second</p>
+
+          <div class="update-item">
+            <div class="update-info">
+              <h4>🇨🇳 China</h4>
+              <div class="update-meta">3:56:58 PM • Electronics & Technology • Source: USTR Database</div>
+            </div>
+            <div class="update-change positive">+0.7%</div>
+          </div>
+
+          <div class="update-item">
+            <div class="update-info">
+              <h4>🇩🇪 Germany</h4>
+              <div class="update-meta">3:56:13 PM • Automotive & Transportation • Source: USTR Database</div>
+            </div>
+            <div class="update-change negative">-0.3%</div>
+          </div>
+
+          <div class="update-item">
+            <div class="update-info">
+              <h4>🇲🇽 Mexico</h4>
+              <div class="update-meta">3:54:58 PM • Textiles & Apparel • Source: USTR Database</div>
+            </div>
+            <div class="update-change positive">+0.9%</div>
+          </div>
+
+          <div class="update-item">
+            <div class="update-info">
+              <h4>🇯🇵 Japan</h4>
+              <div class="update-meta">3:53:58 PM • Industrial Goods • Source: USTR Database</div>
+            </div>
+            <div class="update-change positive">+0.1%</div>
+          </div>
+
+          <div class="update-item">
+            <div class="update-info">
+              <h4>🇬🇧 United Kingdom</h4>
+              <div class="update-meta">3:52:58 PM • Agriculture & Food • Source: USTR Database</div>
+            </div>
+            <div class="update-change negative">-0.2%</div>
+          </div>
+
+          <div class="upgrade-notice">
+            <span>⚡</span>
+            <span><strong>This is live data!</strong> Upgrade to access historical analysis, export tools, and advanced filtering.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">Why Second-by-Second Updates Matter</h2>
+        <p class="section-subtitle">In global trade, timing is everything. Don't let outdated data cost you millions.</p>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Real-Time Advantage</h3>
+            <p>React to tariff changes instantly, not hours or days later. Make informed decisions while your competitors are still waiting for updates.</p>
+            <div class="feature-highlight">Updated every second</div>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">📈</div>
+            <h3>Historical Intelligence</h3>
+            <p>Access 3+ years of tariff data with second-level precision. Identify patterns and predict future changes.</p>
+            <div class="feature-highlight">3+ years of data</div>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🌍</div>
+            <h3>Global Coverage</h3>
+            <p>Track tariffs across 195 countries and territories. Never miss a change that could impact your business.</p>
+            <div class="feature-highlight">195 countries tracked</div>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🔗</div>
+            <h3>API Integration</h3>
+            <p>Integrate real-time tariff data directly into your systems. Automate decisions based on live updates.</p>
+            <div class="feature-highlight" style="background: #fef3c7; color: #92400e;">Premium feature</div>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+          <a href="/checkout.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Get Instant Access</a>
+          <a href="/protected-data" class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem; margin-left: 1rem;">View Live Demo</a>
+        </div>
+      </div>
+    </section>
+    
+    <section class="pricing">
+      <div class="container">
+        <h2 class="section-title">Choose Your Intelligence Level</h2>
+        <p class="section-subtitle">From real-time alerts to comprehensive analysis - find the plan that gives you the competitive edge.</p>
+        
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>Free Trial</h3>
+            <div class="price">$0<span>/7 days</span></div>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Experience the power of real-time data</p>
+            <ul>
+              <li>Live tariff updates (limited countries)</li>
+              <li>Basic world map view</li>
+              <li>Recent changes feed</li>
+              <li>Email support</li>
+            </ul>
+            <a href="/signup.html" class="btn btn-primary" style="width: 100%;">Start Free Trial</a>
+          </div>
+          
+          <div class="pricing-card featured">
+            <div class="popular-badge">Most Popular</div>
+            <h3>Professional</h3>
+            <div class="price">$49<span>/month</span></div>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">For traders who need comprehensive intelligence</p>
+            <ul>
+              <li>All 195 countries - real-time updates</li>
+              <li>Full historical database (3+ years)</li>
+              <li>Advanced filtering & search</li>
+              <li>Multiple export formats</li>
+              <li>API access (10,000 calls/month)</li>
+              <li>Priority support</li>
+            </ul>
+            <a href="/checkout.html?plan=professional" class="btn btn-primary" style="width: 100%;">Get Professional</a>
+          </div>
+          
+          <div class="pricing-card">
+            <h3>Enterprise</h3>
+            <div class="price">Custom<span>/contact us</span></div>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">For organizations requiring maximum intelligence</p>
+            <ul>
+              <li>All Professional features</li>
+              <li>Unlimited API calls</li>
+              <li>Custom integrations</li>
+              <li>Dedicated support team</li>
+              <li>SLA guarantees</li>
+              <li>Custom reporting & analytics</li>
+            </ul>
+            <a href="/checkout.html?plan=enterprise" class="btn btn-primary" style="width: 100%;">Contact Sales</a>
+          </div>
+        </div>
+
+        <p style="text-align: center; color: #64748b; margin-top: 2rem; font-weight: 500;">⚡ All plans include real-time updates. No setup fees. Cancel anytime.</p>
+      </div>
+    </section>
+  </main>
+  
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 AI Tariff Tracker. Real-time global tariff intelligence.</p>
+    </div>
+  </footer>
+
+  <script>
+    function startFreeTrial() {
+      const email = document.getElementById('hero-email')?.value;
+      if (email) {
+        localStorage.setItem('signup-email', email);
+      }
+      window.location.href = '/signup.html';
+    }
+  </script>
+</body>
+</html>
+
