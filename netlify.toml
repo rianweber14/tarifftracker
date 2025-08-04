@@ -1,54 +1,54 @@
 [build]
-  publish = "."
-  functions = "netlify/functions"
+publish = "dist"
+functions = "netlify/functions"
+command = "npm run build"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
+from = "/api/*"
+to = "/.netlify/functions/:splat"
+status = 200
 
 [[redirects]]
-  from = "/account"
-  to = "/account.html"
-  status = 200
+from = "/account"
+to = "/account.html"
+status = 200
 
 [[redirects]]
-  from = "/login"
-  to = "/login.html"
-  status = 200
+from = "/login"
+to = "/login.html"
+status = 200
 
 [[redirects]]
-  from = "/signup"
-  to = "/signup.html"
-  status = 200
+from = "/signup"
+to = "/signup.html"
+status = 200
 
 [[redirects]]
-  from = "/checkout"
-  to = "/checkout.html"
-  status = 200
+from = "/checkout"
+to = "/checkout.html"
+status = 200
 
 [[redirects]]
-  from = "/success"
-  to = "/success.html"
-  status = 200
+from = "/success"
+to = "/success.html"
+status = 200
 
 [[redirects]]
-  from = "/protected-data"
-  to = "/protected-data.html"
-  status = 200
+from = "/protected-data"
+to = "/protected-data.html"
+status = 200
 
-# Protect admin area
 [[headers]]
-  for = "/admin*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
+for = "/admin*"
 
-# CORS headers for API functions
+[headers.values]
+X-Frame-Options = "DENY"
+X-XSS-Protection = "1; mode=block"
+
 [[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+for = "/.netlify/functions/*"
 
+[headers.values]
+Access-Control-Allow-Origin = "*"
+Access-Control-Allow-Headers = "Content-Type, Authorization"
+Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
